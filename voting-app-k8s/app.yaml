@@ -1,0 +1,247 @@
+---
+apiVersion: xl-deploy/v1
+kind: Applications
+spec:
+- name: Applications/Applications
+  type: core.Directory
+- directory: Applications/Applications/application-voting-app-k8s
+  children:
+  - name: deployment-db
+    type: udm.Application
+    lastVersion: 32.0.0-B1
+    children:
+    - name: 32.0.0-B1
+      type: udm.DeploymentPackage
+      satisfiesOkTestManager: true
+      satisfiesOkReleaseManager: true
+      deployables:
+      - name: deployment-db-32.0.0-B1
+        type: k8s.DeploymentSpec
+        containers:
+        - name: container
+          type: k8s.ContainerSpec
+          containerName: postgres
+          image: lyhsoft-registry:8084/postgres:32.0.0-B1
+          ports:
+          - name: port
+            type: k8s.ContainerPortSpec
+            containerPort: "5432"
+          volumeBindings:
+          - name: mounted-volume
+            type: k8s.MountedVolumeSpec
+            volumeName: db-data
+            mountPath: /var/lib/postgresql/data
+        volumes:
+        - name: volume
+          type: k8s.VolumeSpec
+          volumeName: db-data
+          volumeType: emptyDir
+        podCreateDeleteRetryCount: "20"
+        labels:
+          run: db
+          version: 32.0.0-B1
+        restartPolicy: Always
+        deploymentName: deployment-db-32-0-0-b1
+        replicasCount: "1"
+        matchLabels:
+          run: db
+          version: 32.0.0-B1
+      applicationDependencies:
+        service-db: ""
+      dependencyResolution: EXISTING
+      undeployDependencies: "true"
+  - name: service-result
+    type: udm.Application
+    lastVersion: 1.0.0-B1
+    children:
+    - name: 1.0.0-B1
+      type: udm.DeploymentPackage
+      satisfiesOkTestManager: true
+      satisfiesOkReleaseManager: true
+      deployables:
+      - name: service-result
+        type: k8s.ServiceSpec
+        serviceName: service-result
+        serviceType: ClusterIP
+        selectors:
+          run: result
+        ports:
+        - name: port
+          type: k8s.ServicePortSpec
+          portName: http
+          port: "5001"
+          targetPort: "80"
+  - name: service-db
+    type: udm.Application
+    lastVersion: 1.0.0-B1
+    children:
+    - name: 1.0.0-B1
+      type: udm.DeploymentPackage
+      satisfiesOkTestManager: true
+      satisfiesOkReleaseManager: true
+      deployables:
+      - name: service-db
+        type: k8s.ServiceSpec
+        serviceName: db
+        serviceType: ClusterIP
+        selectors:
+          run: db
+        ports:
+        - name: port
+          type: k8s.ServicePortSpec
+          portName: db-service
+          port: "5432"
+          targetPort: "5432"
+  - name: deployment-redis
+    type: udm.Application
+    lastVersion: 32.0.0-B1
+    children:
+    - name: 32.0.0-B1
+      type: udm.DeploymentPackage
+      satisfiesOkTestManager: true
+      satisfiesOkReleaseManager: true
+      deployables:
+      - name: deployment-redis-32.0.0-B1
+        type: k8s.DeploymentSpec
+        containers:
+        - name: container
+          type: k8s.ContainerSpec
+          containerName: redis
+          image: lyhsoft-registry:8084/redis:32.0.0-B1
+          ports:
+          - name: port
+            type: k8s.ContainerPortSpec
+            containerPort: "6379"
+          volumeBindings:
+          - name: mounted-volume
+            type: k8s.MountedVolumeSpec
+            volumeName: redis-data
+            mountPath: /data
+        volumes:
+        - name: volume
+          type: k8s.VolumeSpec
+          volumeName: redis-data
+          volumeType: emptyDir
+        podCreateDeleteRetryCount: "20"
+        labels:
+          run: redis
+          version: 32.0.0-B1
+        restartPolicy: Always
+        deploymentName: deployment-redis-32-0-0-b1
+        replicasCount: "1"
+        matchLabels:
+          run: redis
+          version: 32.0.0-B1
+      applicationDependencies:
+        service-redis: ""
+      dependencyResolution: EXISTING
+      undeployDependencies: "true"
+  - name: deployment-worker
+    type: udm.Application
+    lastVersion: 32.0.0-B1
+    children:
+    - name: 32.0.0-B1
+      type: udm.DeploymentPackage
+      satisfiesOkTestManager: true
+      satisfiesOkReleaseManager: true
+      deployables:
+      - name: deployment-worker-32.0.0-B1
+        type: k8s.DeploymentSpec
+        containers:
+        - name: container
+          type: k8s.ContainerSpec
+          containerName: worker
+          image: lyhsoft-registry:8084/worker:32.0.0-B1
+        podCreateDeleteRetryCount: "20"
+        labels:
+          run: worker
+          version: 32.0.0-B1
+        restartPolicy: Always
+        deploymentName: deployment-worker-32-0-0-b1
+        replicasCount: "1"
+        matchLabels:
+          run: worker
+          version: 32.0.0-B1
+      dependencyResolution: EXISTING
+      undeployDependencies: "true"
+  - name: service-redis
+    type: udm.Application
+    lastVersion: 1.0.0-B1
+    children:
+    - name: 1.0.0-B1
+      type: udm.DeploymentPackage
+      satisfiesOkTestManager: true
+      satisfiesOkReleaseManager: true
+      deployables:
+      - name: service-redis
+        type: k8s.ServiceSpec
+        serviceName: redis
+        serviceType: ClusterIP
+        selectors:
+          run: redis
+        ports:
+        - name: port
+          type: k8s.ServicePortSpec
+          portName: redis-service
+          port: "6379"
+          targetPort: "6379"
+  - name: deployment-result
+    type: udm.Application
+    lastVersion: 32.0.0-B1
+    children:
+    - name: 32.0.0-B1
+      type: udm.DeploymentPackage
+      satisfiesOkTestManager: true
+      satisfiesOkReleaseManager: true
+      deployables:
+      - name: deployment-result-32.0.0-B1
+        type: k8s.DeploymentSpec
+        containers:
+        - name: container
+          type: k8s.ContainerSpec
+          containerName: result
+          image: lyhsoft-registry:8084/result:32.0.0-B1
+          ports:
+          - name: port
+            type: k8s.ContainerPortSpec
+            containerPort: "80"
+        podCreateDeleteRetryCount: "20"
+        labels:
+          version: 32.0.0-B1
+          run: result
+        restartPolicy: Always
+        deploymentName: deployment-result-32-0-0-b1
+        replicasCount: "1"
+        matchLabels:
+          version: 32.0.0-B1
+          run: result
+      - name: destination-rule-result-32.0.0-B1
+        type: k8s.ResourcesFile
+        mergePatchType: strategic
+        propagationPolicy: Foreground
+        updateMethod: apply
+        file: !file "artifacts/destination-rules.yaml"
+      applicationDependencies:
+        service-result: ""
+        virtual-service-result: 32.0.0-B1
+      dependencyResolution: EXISTING
+      undeployDependencies: "true"
+  - name: virtual-service-result
+    type: udm.Application
+    lastVersion: 32.0.0-B1
+    children:
+    - name: 32.0.0-B1
+      type: udm.DeploymentPackage
+      satisfiesOkTestManager: true
+      satisfiesOkReleaseManager: true
+      deployables:
+      - name: virtual-service-result-32.0.0-B1
+        type: k8s.ResourcesFile
+        mergePatchType: strategic
+        propagationPolicy: Foreground
+        updateMethod: apply
+        file: !file "artifacts/virtual-service.yaml"
+      applicationDependencies:
+        gateway: 1.0.0-B1
+      dependencyResolution: EXISTING
+      undeployDependencies: "true"

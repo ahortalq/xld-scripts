@@ -1,0 +1,10 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: destination-rule-result-32-0-0-b1
+spec:
+  host: service-result
+  subsets:
+  - name: result-32-0-0-B1
+    labels:
+      version: "32.0.0-B1"

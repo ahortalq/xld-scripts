@@ -1,0 +1,48 @@
+# Para probar esta aplicación en el cluster local, ejecutar
+# kubectl port-forward nginx-7bb7cd8db5-ktpch 6789:1234
+# Se podrá acceder deste localhost:6789
+# Para probar esta aplicación en el cluster GCP, ejecutar
+# kubectl get service tutorial-service -o yaml | grep ip
+# para obtener la IP desde la que hacer la consulta
+---
+apiVersion: xl-deploy/v1
+kind: Applications
+spec:
+- name: Applications/Applications
+  type: core.Directory
+- name: Applications/Applications/application-tutorial
+  type: core.Directory
+- name: Applications/Applications/application-tutorial/tutorial
+  type: udm.Application
+
+- name: Applications/Applications/application-tutorial/tutorial/1.0.0-B1
+  type: udm.DeploymentPackage
+  deployables:
+  - name: tutorial-deployment
+    type: k8s.DeploymentSpec
+    containers:
+    - name: tutorial-container
+      type: k8s.ContainerSpec
+      containerName: tutorial-container
+      image: lyhsoft/tutorial:1
+      ports:
+      - name: tutorial-container-port
+        type: k8s.ContainerPortSpec
+        containerPort: "1234"
+    labels:
+      app: tutorial
+    deploymentName: tutorial-deployment
+    replicasCount: "1"
+    matchLabels:
+      app: tutorial
+  - name: tutorial-service
+    type: k8s.ServiceSpec
+    serviceName: tutorial-service
+    serviceType: ClusterIP
+    selectors:
+      app: tutorial
+    ports:
+    - name: tutorial-service-port
+      type: k8s.ServicePortSpec
+      port: "80"
+      targetPort: "1234"

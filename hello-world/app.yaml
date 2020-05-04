@@ -1,0 +1,42 @@
+# Para probar esta aplicación en el cluster local, ejecutar
+# kubectl port-forward nginx-7bb7cd8db5-ktpch 6789:1234
+# Se podrá acceder deste localhost:6789
+# Para probar esta aplicación en el cluster GCP, ejecutar
+# kubectl get service helloworld-service -o yaml | grep ip
+# para obtener la IP desde la que hacer la consulta
+---
+apiVersion: xl-deploy/v1
+kind: Applications
+spec:
+- name: Applications/Applications/application-helloworld/helloworld/1.0.0
+  type: udm.DeploymentPackage
+  deployables:
+  - name: helloworld-deployment
+    type: k8s.DeploymentSpec
+    deploymentName: helloworld-deployment
+    replicasCount: 1
+    matchLabels:
+      app: helloworld
+    containers:
+    - name: helloworld-container
+      type: k8s.ContainerSpec
+      containerName: helloworld-container
+      image: dockercloud/hello-world
+      ports:
+      - name: helloworld-container-port
+        type: k8s.ContainerPortSpec
+        containerPort: 80
+    labels:
+      app: helloworld
+  - name: helloworld-service
+    type: k8s.ServiceSpec
+    serviceName: helloworld-service
+    serviceType: ClusterIP
+    selectors:
+      app: helloworld
+    ports:
+    - name: helloworld-service-port
+      type: k8s.ServicePortSpec
+      protocol: TCP
+      port: 80
+      targetPort: 80

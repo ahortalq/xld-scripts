@@ -1,0 +1,158 @@
+---
+apiVersion: xl-deploy/v1
+kind: Applications
+spec:
+- name: Applications/Applications
+  type: core.Directory
+- name: Applications/Applications/application-voting-app
+  type: core.Directory
+- name: Applications/Applications/application-voting-app/bdd-voting-app
+  type: udm.Application
+- name: Applications/Applications/application-voting-app/front-voting-app
+  type: udm.Application
+- name: Applications/Applications/application-voting-app/worker-voting-app
+  type: udm.Application
+- name: Applications/Applications/application-voting-app/voting-app
+  type: udm.Application
+
+- name: Applications/Applications/application-voting-app/bdd-voting-app/1.0.0-B1
+  type: udm.DeploymentPackage
+  deployables:
+  - name: redis-deployment
+    type: k8s.DeploymentSpec
+    containers:
+    - name: redis-container
+      type: k8s.ContainerSpec
+      containerName: redis
+      image: redis:alpine
+      volumeBindings:
+      - name: redis-volume
+        type: k8s.MountedVolumeSpec
+        volumeName: redis-data
+        mountPath: /data
+    volumes:
+    - name: redis-volume
+      type: k8s.VolumeSpec
+      volumeName: redis-data
+      volumeType: emptyDir
+    deploymentName: redis
+    replicasCount: "1"
+    matchLabels:
+      app: redis
+  - name: db-deployment
+    type: k8s.DeploymentSpec
+    containers:
+    - name: db-container
+      type: k8s.ContainerSpec
+      containerName: db
+      image: postgres:9.4
+      volumeBindings:
+      - name: db-data
+        type: k8s.MountedVolumeSpec
+        volumeName: db-data
+        mountPath: /var/lib/postgresql/data
+    volumes:
+    - name: db-volume
+      type: k8s.VolumeSpec
+      volumeName: db-data
+      volumeType: emptyDir
+    deploymentName: db
+    replicasCount: "1"
+    matchLabels:
+      app: db
+  - name: db-service
+    type: k8s.ServiceSpec
+    serviceName: db
+    serviceType: ClusterIP
+    selectors:
+      app: db
+    ports:
+    - name: db-port
+      type: k8s.ServicePortSpec
+      port: "5432"
+      targetPort: "5432"
+  - name: redis-service
+    type: k8s.ServiceSpec
+    serviceName: redis
+    serviceType: ClusterIP
+    selectors:
+      app: redis
+    ports:
+    - name: redis-port
+      type: k8s.ServicePortSpec
+      port: "6379"
+      targetPort: "6379"
+
+- name: Applications/Applications/application-voting-app/front-voting-app/1.0.0-B1
+  type: udm.DeploymentPackage
+  deployables:
+  - name: result-deployment
+    type: k8s.DeploymentSpec
+    containers:
+    - name: result-container
+      type: k8s.ContainerSpec
+      containerName: result
+      image: dockersamples/examplevotingapp_result:before
+    deploymentName: result
+    replicasCount: "1"
+    matchLabels:
+      app: result
+  - name: vote-deployment
+    type: k8s.DeploymentSpec
+    containers:
+    - name: vote-container
+      type: k8s.ContainerSpec
+      containerName: vote
+      image: dockersamples/examplevotingapp_vote:before
+    deploymentName: vote
+    replicasCount: "1"
+    matchLabels:
+      app: vote
+  - name: result-service
+    type: k8s.ServiceSpec
+    serviceName: result
+    serviceType: ClusterIP
+    selectors:
+      app: result
+    ports:
+    - name: result-port
+      type: k8s.ServicePortSpec
+      portName: result-service
+      port: "5001"
+      targetPort: "80"
+  - name: vote-service
+    type: k8s.ServiceSpec
+    serviceName: vote
+    serviceType: ClusterIP
+    selectors:
+      app: vote
+    ports:
+    - name: vote-port
+      type: k8s.ServicePortSpec
+      portName: vote-service
+      port: "5000"
+      targetPort: "80"
+
+- name: Applications/Applications/application-voting-app/worker-voting-app/1.0.0-B1
+  type: udm.DeploymentPackage
+  deployables:
+  - name: worker-deployment
+    type: k8s.DeploymentSpec
+    containers:
+    - name: worker-container
+      type: k8s.ContainerSpec
+      containerName: worker
+      image: dockersamples/examplevotingapp_worker
+    deploymentName: worker
+    replicasCount: "1"
+    matchLabels:
+      app: worker
+
+- name: Applications/Applications/application-voting-app/voting-app/1.0.0-B1
+  type: udm.CompositePackage
+  orchestrator:
+  - sequential-by-composite-package
+  packages:
+  - Applications/Applications/application-voting-app/bdd-voting-app/1.0.0-B1
+  - Applications/Applications/application-voting-app/front-voting-app/1.0.0-B1
+  - Applications/Applications/application-voting-app/worker-voting-app/1.0.0-B1

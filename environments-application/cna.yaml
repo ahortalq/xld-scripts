@@ -1,0 +1,128 @@
+---
+apiVersion: xl-release/v1
+kind: Templates
+spec:
+- directory: Utilities
+  children:
+  - template: create-new-environment-application
+    phases:
+    - phase: Create new environments
+      tasks:
+      - name: Create dev environment for ${applicationName}
+        type: webhook.JsonWebhook
+        URL: http://localhost:5516/api/v1/environments
+        method: POST
+        body: |-
+          {
+            "title" : "application-${applicationName}-dev",
+            "description" : "Development environment for application ${applicationName}",
+            "stageId" : "${devStageId}",
+            "labelIds" : null
+          }
+        username: admin
+        password: !value "webhook_JsonWebhook_Create_dev_environment_for___applicationName__password"
+        jsonPathExpression: id
+        description: |-
+          ### Create new environments
+          We need to create three environments for ${applicationName}
+        variableMapping:
+          pythonScript.result: ${devEnvironmentId}
+      - name: Create pre environment for ${applicationName}
+        type: webhook.JsonWebhook
+        URL: http://localhost:5516/api/v1/environments
+        method: POST
+        body: |-
+          {
+            "title" : "application-${applicationName}-pre",
+            "description" : "Preproduction environment for application ${applicationName}",
+            "stageId" : "${preStageId}",
+            "labelIds" : null
+          }
+        username: admin
+        password: !value "webhook_JsonWebhook_Create_pre_environment_for___applicationName__password"
+        jsonPathExpression: id
+        description: |-
+          ### Create new environments
+          We need to create three environments for ${applicationName}
+        variableMapping:
+          pythonScript.result: ${preEnvironmentId}
+      - name: Create pro environment for ${applicationName}
+        type: webhook.JsonWebhook
+        URL: http://localhost:5516/api/v1/environments
+        method: POST
+        body: |-
+          {
+            "title" : "application-${applicationName}-pro",
+            "description" : "Production environment for application ${applicationName}",
+            "stageId" : "${proStageId}",
+            "labelIds" : null
+          }
+        username: admin
+        password: !value "webhook_JsonWebhook_Create_pro_environment_for___applicationName__password"
+        jsonPathExpression: id
+        description: |-
+          ### Create new environments
+          We need to create three environments for ${applicationName}
+        variableMapping:
+          pythonScript.result: ${proEnvironmentId}
+      color: '#08B153'
+    - phase: Create new application
+      tasks:
+      - name: Create new application ${applicationName}
+        type: webhook.JsonWebhook
+        URL: http://localhost:5516/api/v1/applications
+        method: POST
+        body: |-
+          {
+            "title" : "${applicationName}",
+            "environmentIds" : ["${devEnvironmentId}", "${preEnvironmentId}", "${proEnvironmentId}"]
+          }
+        username: admin
+        password: !value "webhook_JsonWebhook_Create_new_application___applicationName__password"
+      color: '#991C71'
+    variables:
+    - type: xlrelease.StringVariable
+      key: devStageId
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Development Stage ID
+      description: Development Stage ID
+      value: Configuration/environmentManagement/EnvironmentStagea6fc269905114e8780bca148604961a1
+    - type: xlrelease.StringVariable
+      key: preStageId
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Preproduction Stage ID
+      description: Preproduction Stage ID
+      value: Configuration/environmentManagement/EnvironmentStage36f075d0b0c446468c7a431f5df1507d
+    - type: xlrelease.StringVariable
+      key: proStageId
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Production Stage ID
+      description: Production Stage ID
+      value: Configuration/environmentManagement/EnvironmentStagea39c9eb5baa6412f96361e02dedf6275
+    - type: xlrelease.StringVariable
+      key: applicationName
+      label: Application Name
+      description: Application Name
+      value: calculator
+    - type: xlrelease.StringVariable
+      key: devEnvironmentId
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Development Environment ID
+      description: Development Environment ID
+    - type: xlrelease.StringVariable
+      key: preEnvironmentId
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Preproduction Environment ID
+      description: Preproduction Environment ID
+    - type: xlrelease.StringVariable
+      key: proEnvironmentId
+      requiresValue: false
+      showOnReleaseStart: false
+      label: Production Environment ID
+      description: Production Environment ID
+    riskProfile: Default risk profile

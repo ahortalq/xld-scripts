@@ -1,0 +1,23 @@
+---
+apiVersion: xl-deploy/v1
+kind: Applications
+spec:
+- name: Applications/Applications
+  type: core.Directory
+- name: !format Applications/Applications/application-%application%
+  type: core.Directory
+
+---
+apiVersion: xl-deploy/v1
+kind: Environments
+spec:
+- name: !format Environments/application-%application%
+  type: core.Directory
+- name: !format Environments/application-%application%/application-%application%-dev
+  type: core.Directory
+- name: !format Environments/application-%application%/application-%application%-pre
+  type: core.Directory
+- name: !format Environments/application-%application%/application-%application%-pro
+  type: core.Directory
+- name: !format Environments/dictionaries-%application%
+  type: core.Directory

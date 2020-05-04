@@ -1,0 +1,36 @@
+---
+apiVersion: xl-deploy/v1
+kind: Applications
+spec:
+- name: Applications/Applications
+  type: core.Directory
+- name: Applications/Applications/application-petclinic
+  type: core.Directory
+- name: Applications/Applications/application-petclinic/petclinic-war
+  type: udm.Application
+- name: Applications/Applications/application-petclinic/petclinic-ear
+  type: udm.Application
+- name: Applications/Applications/application-petclinic/petclinic-ear/1.0.0-B1
+  type: udm.DeploymentPackage
+  deployables:
+  - name: petclinic
+    type: jee.Ear
+    file: !file "artifacts/PetClinic-1.0.ear"
+- name: Applications/Applications/application-petclinic/petclinic-ear/2.0.0-B2
+  type: udm.DeploymentPackage
+  deployables:
+  - name: petclinic
+    type: jee.Ear
+    file: !file "artifacts/PetClinic-2.0.ear"
+- name: Applications/Applications/application-petclinic/petclinic-war/1.0.0-B1
+  type: udm.DeploymentPackage
+  deployables:
+  - name: petclinic
+    type: jee.War
+    file: !file "artifacts/PetClinic-1.0.war"
+- name: Applications/Applications/application-petclinic/petclinic-war/2.0.0-B2
+  type: udm.DeploymentPackage
+  deployables:
+  - name: petclinic
+    type: jee.War
+    file: !file "artifacts/PetClinic-2.0.war"

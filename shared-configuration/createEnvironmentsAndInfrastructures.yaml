@@ -1,0 +1,295 @@
+---
+apiVersion: xl-deploy/v1
+kind: Infrastructure
+spec:
+- name: !format Infrastructure/%organization%
+  type: core.Directory
+- name: !format Infrastructure/%organization%/host-dev
+  type: overthere.SshHost
+  os: UNIX
+  connectionType: SCP
+  address: localhost
+  port: 2222
+  username: tomcat
+  privateKeyFile: /home/jcla/.ssh/id_rsa
+  children:
+  - name: axis2
+    type: axis2.Deployer
+    axis2ServicesDirectory: /opt/apache-tomcat-8.5.8/webapps/axis2/WEB-INF/services
+  - name: mysql-cli
+    type: sql.MySqlClient
+    username: cng_user
+    mySqlHome: /usr
+    databaseName: congruencias
+  - name: tomcat
+    type: tomcat.Server
+    home: /opt/apache-tomcat-8.5.8
+    startCommand: sudo service tomcat start
+    stopCommand: sudo service tomcat stop
+    statusCommand: sudo service tomcat status
+    children:
+    - name: virtual-host-congruencias
+      type: tomcat.VirtualHost
+  - name: smokeTest
+    type: smoketest.Runner
+  - name: apache2-server
+    type: www.ApacheHttpdServer
+    startCommand: sudo service apache2 start
+    stopCommand: sudo service apache2 stop
+    restartCommand: sudo service apache2 restart
+    defaultDocumentRoot: /var/www
+    configurationFragmentDirectory: /etc/apache2/sites-enabled
+- name: !format Infrastructure/%organization%/host-pre
+  type: overthere.SshHost
+  os: UNIX
+  connectionType: SCP
+  address: localhost
+  port: 2223
+  username: tomcat
+  privateKeyFile: /home/jcla/.ssh/id_rsa
+  children:
+  - name: smokeTest
+    type: smoketest.Runner
+  - name: axis2
+    type: axis2.Deployer
+    axis2ServicesDirectory: /opt/apache-tomcat-8.5.8/webapps/axis2/WEB-INF/services
+  - name: tomcat
+    type: tomcat.Server
+    home: /opt/apache-tomcat-8.5.8
+    startCommand: sudo service tomcat start
+    stopCommand: sudo service tomcat stop
+    statusCommand: sudo service tomcat status
+    children:
+    - name: virtual-host-congruencias
+      type: tomcat.VirtualHost
+  - name: mysql-cli
+    type: sql.MySqlClient
+    username: cng_user
+    mySqlHome: /usr
+    databaseName: congruencias
+  - name: apache2-server
+    type: www.ApacheHttpdServer
+    startCommand: sudo service apache2 start
+    stopCommand: sudo service apache2 stop
+    restartCommand: sudo service apache2 restart
+    defaultDocumentRoot: /var/www
+    configurationFragmentDirectory: /etc/apache2/sites-enabled
+- name: !format Infrastructure/%organization%/host-pro-1
+  type: overthere.SshHost
+  deploymentGroup: 1
+  os: UNIX
+  connectionType: SCP
+  address: localhost
+  port: 2224
+  username: tomcat
+  privateKeyFile: /home/jcla/.ssh/id_rsa
+  children:
+  - name: tomcat
+    type: tomcat.Server
+    deploymentGroup: 1
+    home: /opt/apache-tomcat-8.5.8
+    startCommand: sudo service tomcat start
+    stopCommand: sudo service tomcat stop
+    statusCommand: sudo service tomcat status
+    children:
+    - name: virtual-host-congruencias
+      type: tomcat.VirtualHost
+      deploymentGroup: 1
+  - name: axis2
+    type: axis2.Deployer
+    deploymentGroup: 1
+    axis2ServicesDirectory: /opt/apache-tomcat-8.5.8/webapps/axis2/WEB-INF/services
+  - name: smokeTest
+    type: smoketest.Runner
+    deploymentGroup: 1
+  - name: mysql-cli
+    type: sql.MySqlClient
+    deploymentGroup: 1
+    username: cng_user
+    mySqlHome: /usr
+    databaseName: congruencias
+  - name: apache2-server
+    type: www.ApacheHttpdServer
+    startCommand: sudo service apache2 start
+    stopCommand: sudo service apache2 stop
+    restartCommand: sudo service apache2 restart
+    defaultDocumentRoot: /var/www
+    configurationFragmentDirectory: /etc/apache2/sites-enabled
+    deploymentGroup: 1
+- name: !format Infrastructure/%organization%/host-pro-2
+  type: overthere.SshHost
+  deploymentGroup: 2
+  os: UNIX
+  connectionType: SCP
+  address: localhost
+  port: 2224
+  username: tomcat
+  privateKeyFile: /home/jcla/.ssh/id_rsa
+  children:
+  - name: mysql-cli
+    type: sql.MySqlClient
+    deploymentGroup: 2
+    username: cng_user
+    mySqlHome: /usr
+    databaseName: congruencias
+  - name: tomcat
+    type: tomcat.Server
+    deploymentGroup: 2
+    home: /opt/apache-tomcat-8.5.8
+    startCommand: sudo service tomcat start
+    stopCommand: sudo service tomcat stop
+    statusCommand: sudo service tomcat status
+    children:
+    - name: virtual-host-congruencias
+      type: tomcat.VirtualHost
+      deploymentGroup: 2
+  - name: smokeTest
+    type: smoketest.Runner
+    deploymentGroup: 2
+  - name: axis2
+    type: axis2.Deployer
+    deploymentGroup: 2
+    axis2ServicesDirectory: /opt/apache-tomcat-8.5.8/webapps/axis2/WEB-INF/services
+  - name: apache2-server
+    type: www.ApacheHttpdServer
+    startCommand: sudo service apache2 start
+    stopCommand: sudo service apache2 stop
+    restartCommand: sudo service apache2 restart
+    defaultDocumentRoot: /var/www
+    configurationFragmentDirectory: /etc/apache2/sites-enabled
+    deploymentGroup: 2
+- name: !format Infrastructure/%organization%/host-pro-3
+  type: overthere.SshHost
+  deploymentGroup: 3
+  os: UNIX
+  connectionType: SCP
+  address: localhost
+  port: 2224
+  username: tomcat
+  privateKeyFile: /home/jcla/.ssh/id_rsa
+  children:
+  - name: tomcat
+    type: tomcat.Server
+    deploymentGroup: 3
+    home: /opt/apache-tomcat-8.5.8
+    startCommand: sudo service tomcat start
+    stopCommand: sudo service tomcat stop
+    statusCommand: sudo service tomcat status
+    children:
+    - name: virtual-host-congruencias
+      type: tomcat.VirtualHost
+      deploymentGroup: 3
+  - name: axis2
+    type: axis2.Deployer
+    deploymentGroup: 3
+    axis2ServicesDirectory: /opt/apache-tomcat-8.5.8/webapps/axis2/WEB-INF/services
+  - name: smokeTest
+    type: smoketest.Runner
+    deploymentGroup: 3
+  - name: mysql-cli
+    type: sql.MySqlClient
+    deploymentGroup: 3
+    username: cng_user
+    mySqlHome: /usr
+    databaseName: congruencias
+  - name: apache2-server
+    type: www.ApacheHttpdServer
+    startCommand: sudo service apache2 start
+    stopCommand: sudo service apache2 stop
+    restartCommand: sudo service apache2 restart
+    defaultDocumentRoot: /var/www
+    configurationFragmentDirectory: /etc/apache2/sites-enabled
+    deploymentGroup: 3
+- name: !format Infrastructure/%organization%/host-pro-4
+  type: overthere.SshHost
+  deploymentGroup: 4
+  os: UNIX
+  connectionType: SCP
+  address: localhost
+  port: 2224
+  username: tomcat
+  privateKeyFile: /home/jcla/.ssh/id_rsa
+  children:
+  - name: axis2
+    type: axis2.Deployer
+    deploymentGroup: 4
+    axis2ServicesDirectory: /opt/apache-tomcat-8.5.8/webapps/axis2/WEB-INF/services
+  - name: mysql-cli
+    type: sql.MySqlClient
+    deploymentGroup: 4
+    username: cng_user
+    mySqlHome: /usr
+    databaseName: congruencias
+  - name: apache2-server
+    type: www.ApacheHttpdServer
+    startCommand: sudo service apache2 start
+    stopCommand: sudo service apache2 stop
+    restartCommand: sudo service apache2 restart
+    defaultDocumentRoot: /var/www
+    configurationFragmentDirectory: /etc/apache2/sites-enabled
+    deploymentGroup: 4
+  - name: tomcat
+    type: tomcat.Server
+    deploymentGroup: 4
+    home: /opt/apache-tomcat-8.5.8
+    startCommand: sudo service tomcat start
+    stopCommand: sudo service tomcat stop
+    statusCommand: sudo service tomcat status
+    children:
+    - name: virtual-host-congruencias
+      type: tomcat.VirtualHost
+      deploymentGroup: 4
+  - name: smokeTest
+    type: smoketest.Runner
+    deploymentGroup: 4
+---
+apiVersion: xl-deploy/v1
+kind: Environments
+spec:
+- name: !format Environments/%organization%
+  type: core.Directory
+- name: !format Environments/%organization%/%organization%-dev
+  type: udm.Environment
+  dictionaries:
+  - Environments/dictionaries-calculator/dictionary-application-calculator-dev
+  members:
+  - !format Infrastructure/%organization%/host-dev/tomcat/virtual-host-congruencias
+  - !format Infrastructure/%organization%/host-dev/axis2
+  - !format Infrastructure/%organization%/host-dev/smokeTest
+  - !format Infrastructure/%organization%/host-dev/mysql-cli
+  - !format Infrastructure/%organization%/host-dev/apache2-server
+- name: !format Environments/%organization%/%organization%-pre
+  type: udm.Environment
+  dictionaries:
+  - Environments/dictionaries-calculator/dictionary-application-calculator-pre
+  members:
+  - !format Infrastructure/%organization%/host-pre/smokeTest
+  - !format Infrastructure/%organization%/host-pre/axis2
+  - !format Infrastructure/%organization%/host-pre/tomcat/virtual-host-congruencias
+  - !format Infrastructure/%organization%/host-pre/mysql-cli
+  - !format Infrastructure/%organization%/host-pre/apache2-server
+- name: !format Environments/%organization%/%organization%-pro
+  type: udm.Environment
+  dictionaries:
+  - Environments/dictionaries-calculator/dictionary-application-calculator-pro
+  members:
+  - !format Infrastructure/%organization%/host-pro-2/axis2
+  - !format Infrastructure/%organization%/host-pro-4/smokeTest
+  - !format Infrastructure/%organization%/host-pro-2/mysql-cli
+  - !format Infrastructure/%organization%/host-pro-1/axis2
+  - !format Infrastructure/%organization%/host-pro-3/smokeTest
+  - !format Infrastructure/%organization%/host-pro-1/mysql-cli
+  - !format Infrastructure/%organization%/host-pro-2/smokeTest
+  - !format Infrastructure/%organization%/host-pro-1/tomcat/virtual-host-congruencias
+  - !format Infrastructure/%organization%/host-pro-3/mysql-cli
+  - !format Infrastructure/%organization%/host-pro-1/smokeTest
+  - !format Infrastructure/%organization%/host-pro-4/tomcat/virtual-host-congruencias
+  - !format Infrastructure/%organization%/host-pro-4/axis2
+  - !format Infrastructure/%organization%/host-pro-4/mysql-cli
+  - !format Infrastructure/%organization%/host-pro-2/tomcat/virtual-host-congruencias
+  - !format Infrastructure/%organization%/host-pro-3/tomcat/virtual-host-congruencias
+  - !format Infrastructure/%organization%/host-pro-3/axis2
+  - !format Infrastructure/%organization%/host-pro-1/apache2-server
+  - !format Infrastructure/%organization%/host-pro-2/apache2-server
+  - !format Infrastructure/%organization%/host-pro-3/apache2-server
+  - !format Infrastructure/%organization%/host-pro-4/apache2-server

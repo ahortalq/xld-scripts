@@ -1,0 +1,8 @@
+# To execute this yaml file
+# xl apply -f deploy.yaml --values env=dev
+---
+apiVersion: xl-deploy/v1
+kind: Deployment
+spec:
+ package: Applications/Applications/application-voting-app-k8s/deployment-vote/32.0.0-B49
+ environment: !format Environments/application-voting-app-k8s/application-voting-app-k8s-%env%/application-voting-app-k8s-%env%
